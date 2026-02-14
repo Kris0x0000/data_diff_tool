@@ -50,11 +50,12 @@ SEPARATOR_MAP = {
     "---  ;  ---": ";",
     "---  ,  ---": ",",
     "--- SOH ---": chr(1),
-    "--- TAB ---": "\t"
+    "--- TAB ---": "\t",
+    "--- \\n ---": "\n"
 }
 
 root = tk.Tk()
-root.title("Data Diff Tool v.1.2.0 - Porównywanie komunikatów")
+root.title("Data Diff Tool v.1.2.1 - Porównywanie komunikatów")
 root.geometry("900x600")
 
 # Górny pasek ustawień
@@ -74,7 +75,7 @@ tk.Button(frame_settings, text="WYCZYŚĆ", command=clear_all, bg="#d32f2f", fg=
 # 2. STOPKA (Deklarujemy ją TERAZ, aby zarezerwować dół okna)
 footer_frame = tk.Frame(root, bg="#f0f0f0", bd=1, relief="ridge")
 footer_frame.pack(side=tk.BOTTOM, fill="x")
-tk.Label(footer_frame, text="Wersja 1.2.0 | © 2026 Krzysztof Kosowski", 
+tk.Label(footer_frame, text="Wersja 1.2.1 | © 2026 Krzysztof Kosowski", 
          font=('Arial', 8), bg="#f0f0f0", fg="#888").pack(side=tk.RIGHT, padx=10)
 
 # Pola wejściowe

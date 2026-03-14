@@ -1,8 +1,21 @@
 import tkinter as tk
 from tkinter import ttk
+################
+# config start #
+################
 
-version = "v.1.3.0"  # Podbita wersja ze względu na nową funkcję
+version = "v.1.4.0"
 name = "Data Diff Tool"
+font_size_main = 11
+font_style_main = "Consolas"
+font_size_button = 9 
+font_style_button = "Consolas"
+width=1200
+height=600
+
+##############
+# config end #
+##############
 
 def compare_data(*args):
     selected_name = separator_var.get()
@@ -67,6 +80,49 @@ def clear_first():
 def clear_second():
     entry_bottom.delete(0, tk.END)
     compare_data()
+    
+def center_window(window, width, height):
+    # Pobieramy wymiary ekranu
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    # Obliczamy współrzędne X i Y dla środka
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+
+    # Ustawiamy geometrię okna
+    window.geometry(f'{width}x{height}+{x}+{y}')
+
+    #root = tk.Tk()
+    #center_window(root, 800, 600)
+    
+def copy_row(event):
+    # Pobierz ID zaznaczonego wiersza
+    item_id = tree.identify_row(event.y)
+    if not item_id:
+        return    
+    tree.selection_set(item_id) # Upewnij się, że wiersz jest zaznaczony
+    values = tree.item(item_id, 'values')
+    
+    if values:
+        # Tworzymy proste menu kontekstowe
+        menu_font = (font_style_main, font_size_main)
+        menu = tk.Menu(root, tearoff=0, font=menu_font)
+        
+        menu.add_command(label=f"Kopiuj wartość 1: {values[1][:20]}...", 
+                         command=lambda: root.clipboard_append(values[1]))
+        menu.add_command(label=f"Kopiuj wartość 2: {values[2][:20]}...", 
+                         command=lambda: root.clipboard_append(values[2]))
+        menu.add_separator()
+        menu.add_command(label="Kopiuj obie wartości", 
+                         command=lambda: root.clipboard_append(f"{values[1]} ; {values[2]}"))
+        
+        # Wyświetl menu w miejscu kliknięcia
+        menu.post(event.x_root, event.y_root)
+        
+        # Czyścimy schowek przed nowym kopiowaniem (opcjonalnie, ale zalecane)
+        root.clipboard_clear()
+        
 
 def treeview_sort_column(tv, col, reverse):
     l = [(tv.set(k, col), k) for k in tv.get_children('')]
@@ -101,31 +157,31 @@ SEPARATOR_MAP = {
 
 root = tk.Tk()
 root.title(name + " " + version)
-root.geometry("1100x700")
+center_window(root, width, height)
 
 # Górny pasek ustawień
 frame_settings = tk.Frame(root, padx=20, pady=15, bg="#ececec")
 frame_settings.pack(side=tk.TOP, fill="x")
 
 # Separator
-tk.Label(frame_settings, text="SEPARATOR:", font=('Arial', 8, 'bold'), bg="#ececec").pack(side=tk.LEFT)
+tk.Label(frame_settings, text="SEPARATOR:", font=(font_style_main, font_size_main), bg="#ececec").pack(side=tk.LEFT)
 separator_var = tk.StringVar(value="---  |  ---")
 separator_choice = ttk.Combobox(frame_settings, textvariable=separator_var, values=list(SEPARATOR_MAP.keys()), width=15, state="readonly", justify="center")
 separator_choice.pack(side=tk.LEFT, padx=(5, 20))
 separator_choice.bind("<<ComboboxSelected>>", compare_data)
 
 # WYSZUKIWARKA (Nowość)
-tk.Label(frame_settings, text="SZUKAJ WARTOŚCI:", font=('Arial', 8, 'bold'), bg="#ececec").pack(side=tk.LEFT)
-entry_search = tk.Entry(frame_settings, font=('Arial', 10), width=30)
+tk.Label(frame_settings, text="SZUKAJ WARTOŚCI:", font=(font_style_main, font_size_main), bg="#ececec").pack(side=tk.LEFT)
+entry_search = tk.Entry(frame_settings, font=(font_style_main, font_size_main), width=30)
 entry_search.pack(side=tk.LEFT, padx=5)
 entry_search.bind("<KeyRelease>", compare_data) # Reaguje na pisanie
 
-tk.Button(frame_settings, text="WYCZYŚĆ WSZYSTKO", command=clear_all, bg="#d32f2f", fg="white", font=('Arial', 8, 'bold'), padx=10).pack(side=tk.RIGHT)
+tk.Button(frame_settings, text="WYCZYŚĆ WSZYSTKO", command=clear_all, bg="#B22222", fg="white", font=(font_style_button, font_size_button), padx=1).pack(side=tk.RIGHT)
 
 # Stopka
 footer_frame = tk.Frame(root, bg="#f0f0f0", bd=1, relief="ridge")
 footer_frame.pack(side=tk.BOTTOM, fill="x")
-tk.Label(footer_frame, text=name+" "+version+" | Krzysztof Kosowski", font=('Arial', 8), bg="#f0f0f0", fg="#888").pack(side=tk.RIGHT, padx=10)
+tk.Label(footer_frame, text=name+" "+version+" | Krzysztof Kosowski", font=('Consolas', 8), bg="#f0f0f0", fg="#888").pack(side=tk.RIGHT, padx=10)
 
 # Pola wejściowe
 frame_input = tk.Frame(root, padx=20, pady=10)
@@ -137,36 +193,39 @@ frame_row1.pack(fill="x")
 frame_row2 = tk.Frame(frame_input) # Ramka pomocnicza dla 2. rzędu
 frame_row2.pack(fill="x")
 
-tk.Label(frame_row1, text="PIERWSZY CIĄG DANYCH:", font=('Arial', 8, 'bold')).pack(anchor="w")
-entry_top = tk.Entry(frame_row1, font=('Consolas', 11), fg="#e74c3c")
+tk.Label(frame_row1, text="DANE 1:", font=(font_style_main, font_size_main)).pack(anchor="w")
+entry_top = tk.Entry(frame_row1, font=(font_style_main, font_size_main), fg="#e74c3c")
 entry_top.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 10))
 entry_top.bind("<KeyRelease>", compare_data)
 
-tk.Button(frame_row1, text="WYCZYŚĆ 1", command=clear_first, bg="#B22222", fg="white", font=('Arial', 8, 'bold'), padx=10).pack(side=tk.RIGHT)
+tk.Button(frame_row1, text="WYCZYŚĆ 1", command=clear_first, bg="#B22222", fg="white", font=(font_style_button, font_size_button), padx=10).pack(side=tk.RIGHT)
 
-tk.Label(frame_row2, text="DRUGI CIĄG DANYCH:", font=('Arial', 8, 'bold')).pack(anchor="w")
-entry_bottom = tk.Entry(frame_row2, font=('Consolas', 11), fg="#3498db")
+tk.Label(frame_row2, text="DANE 2:", font=(font_style_main, font_size_main)).pack(anchor="w")
+entry_bottom = tk.Entry(frame_row2, font=(font_style_main, font_size_main), fg="#3498db")
 entry_bottom.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 10))
 entry_bottom.bind("<KeyRelease>", compare_data)
 
-tk.Button(frame_row2, text="WYCZYŚĆ 2", command=clear_second, bg="#B22222", fg="white", font=('Arial', 8, 'bold'), padx=10).pack(side=tk.RIGHT, pady=(10, 10))
+tk.Button(frame_row2, text="WYCZYŚĆ 2", command=clear_second, bg="#B22222", fg="white", font=(font_style_button, font_size_button), padx=10).pack(side=tk.RIGHT)
 
 # --- SEKCJA TREEVIEW (TABELA) ---
-tk.Label(root, text="WYNIKI PORÓWNANIA I FILTROWANIA", font=('Arial', 10, 'bold'), bg="#f5f5f5", fg="#333").pack(pady=(10, 0))
+tk.Label(root, text="WYNIKI PORÓWNANIA I FILTROWANIA", font=(font_style_main, font_size_main), fg="#333").pack(pady=(10, 0))
 
 frame_tree = tk.Frame(root, padx=20, pady=10)
 frame_tree.pack(expand=True, fill="both")
 
 columns = ('nr', 'val1', 'val2', 'diff_status')
 style = ttk.Style()
-style.configure("Treeview", background="#ffffff", foreground="black", rowheight=25, fieldbackground="#ffffff")
+style.configure("Treeview", background="#ffffff", foreground="black", rowheight=25, fieldbackground="#ffffff", font=(font_style_main, font_size_main, 'bold'))
+
+# Konfiguracja czcionki dla nagłówków
+style.configure("Treeview.Heading", font=(font_style_main, font_size_main))
 style.map("Treeview", background=[('selected', '#347083')])
 
 tree = ttk.Treeview(frame_tree, columns=columns, show='headings', selectmode='browse')
 
 tree.heading('nr', text='Nr pola', command=lambda: treeview_sort_column(tree, 'nr', False))
-tree.heading('val1', text='PIERWSZY CIĄG DANYCH', command=lambda: treeview_sort_column(tree, 'val1', False))
-tree.heading('val2', text='DRUGI CIĄG DANYCH', command=lambda: treeview_sort_column(tree, 'val2', False))
+tree.heading('val1', text='DANE 1', command=lambda: treeview_sort_column(tree, 'val1', False))
+tree.heading('val2', text='DANE 2', command=lambda: treeview_sort_column(tree, 'val2', False))
 tree.heading('diff_status', text='RÓŻNICA', command=lambda: treeview_sort_column(tree, 'diff_status', False))
 
 tree.column('nr', width=80, anchor='center')
@@ -180,11 +239,17 @@ tree.configure(yscrollcommand=tree_scrolly.set, xscrollcommand=tree_scrollx.set)
 
 tree_scrolly.pack(side=tk.RIGHT, fill="y")
 tree_scrollx.pack(side=tk.BOTTOM, fill="x")
+
+# Bind dla Windows/Linux (prawy przycisk myszy to Button-3)
+tree.bind("<Button-3>", copy_row)
+# Bind dla MacOS (często Button-2)
+tree.bind("<Button-2>", copy_row)
+
 tree.pack(expand=True, fill="both")
 
-tree.tag_configure('oddrow', background='white', font=('Arial', 10))
-tree.tag_configure('evenrow', background='#f9f9f9', font=('Arial', 10))
-tree.tag_configure('diff', background='#ffcdd2', foreground='#b71c1c', font=('Arial', 10, 'bold'))
-tree.tag_configure('equal', foreground='gray', font=('Arial', 10))
+tree.tag_configure('oddrow', background='white', font=(font_style_main, font_size_main))
+tree.tag_configure('evenrow', background='#f9f9f9', font=(font_style_main, font_size_main))
+tree.tag_configure('diff', background='#ffcdd2', foreground='#b71c1c', font=(font_style_main, font_size_main, 'bold'))
+tree.tag_configure('equal', foreground='gray', font=(font_style_main, font_size_main))
 
 root.mainloop()

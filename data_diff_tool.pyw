@@ -4,7 +4,7 @@ from tkinter import ttk
 # config start #
 ################
 
-version = "v.1.4.0"
+version = "v.1.4.1"
 name = "Data Diff Tool"
 font_size_main = 11
 font_style_main = "Consolas"
@@ -40,27 +40,38 @@ def compare_data(*args):
     visible_rows = 0
     
     for i in range(max_len):
-        p1 = parts1[i].strip() if i < len(parts1) else "<brak>"
-        p2 = parts2[i].strip() if i < len(parts2) else "<brak>"
+        # Pobieramy surową wartość (jeśli istnieje)
+        p1_raw = parts1[i] if i < len(parts1) else "<brak>"
+        p2_raw = parts2[i] if i < len(parts2) else "<brak>"
         
-        # Logika wyszukiwania: jeśli pole wyszukiwania nie jest puste, 
-        # sprawdź czy fraza jest w p1 lub p2. Jeśli nie - pomiń wiersz.
+        # Jeśli to nie jest brak danych, zamieniamy nową linię na spację i czyścimy nadmiarowe spacje
+        # Robimy to TYLKO jeśli separatorem nie jest \n
+        if sep != "\n":
+            if p1_raw != "<brak>":
+                p1 = p1_raw.replace("\n", " ").replace("\r", " ").strip()
+            else: p1 = p1_raw
+            
+            if p2_raw != "<brak>":
+                p2 = p2_raw.replace("\n", " ").replace("\r", " ").strip()
+            else: p2 = p2_raw
+        else:
+            p1 = p1_raw.strip()
+            p2 = p2_raw.strip()
+
+        # Logika wyszukiwania (filtrowanie)
         if search_query and search_query not in p1.lower() and search_query not in p2.lower():
             continue
 
         field_no = i + 1
         visible_rows += 1
-        
-        # Określamy bazowy kolor (zebra) na podstawie widocznych wierszy
         row_tag = 'evenrow' if visible_rows % 2 == 0 else 'oddrow'
         
+        # Porównanie i wstawienie do tabeli
         if p1 != p2:
             found_diff = True
-            is_different = "TAK"
-            tree.insert('', tk.END, values=(field_no, p1, p2, is_different), tags=(row_tag, 'diff'))
+            tree.insert('', tk.END, values=(field_no, p1, p2, "TAK"), tags=(row_tag, 'diff'))
         else:
-            is_different = "NIE"
-            tree.insert('', tk.END, values=(field_no, p1, p2, is_different), tags=(row_tag,))
+            tree.insert('', tk.END, values=(field_no, p1, p2, "NIE"), tags=(row_tag,))
 
     # Jeśli brak różnic w przefiltrowanym widoku
     if not found_diff and visible_rows > 0 and (val1 or val2) and not search_query:
@@ -93,8 +104,6 @@ def center_window(window, width, height):
     # Ustawiamy geometrię okna
     window.geometry(f'{width}x{height}+{x}+{y}')
 
-    #root = tk.Tk()
-    #center_window(root, 800, 600)
     
 def copy_row(event):
     # Pobierz ID zaznaczonego wiersza
@@ -149,8 +158,6 @@ SEPARATOR_MAP = {
     "---  ;  ---": ";",
     "---  ,  ---": ",",
     "--- SOH ---": chr(1),
-    "--- TAB ---": "\t",
-    "--- \\n ---": "\n",
     "--- # ---": "#",
     "--- $ ---": "$"
 }
@@ -198,14 +205,14 @@ entry_top = tk.Entry(frame_row1, font=(font_style_main, font_size_main), fg="#e7
 entry_top.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 10))
 entry_top.bind("<KeyRelease>", compare_data)
 
-tk.Button(frame_row1, text="WYCZYŚĆ 1", command=clear_first, bg="#B22222", fg="white", font=(font_style_button, font_size_button), padx=10).pack(side=tk.RIGHT)
+tk.Button(frame_row1, text="WYCZYŚĆ 1", command=clear_first, font=(font_style_button, font_size_button), padx=10).pack(side=tk.RIGHT)
 
 tk.Label(frame_row2, text="DANE 2:", font=(font_style_main, font_size_main)).pack(anchor="w")
 entry_bottom = tk.Entry(frame_row2, font=(font_style_main, font_size_main), fg="#3498db")
 entry_bottom.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 10))
 entry_bottom.bind("<KeyRelease>", compare_data)
 
-tk.Button(frame_row2, text="WYCZYŚĆ 2", command=clear_second, bg="#B22222", fg="white", font=(font_style_button, font_size_button), padx=10).pack(side=tk.RIGHT)
+tk.Button(frame_row2, text="WYCZYŚĆ 2", command=clear_second, font=(font_style_button, font_size_button), padx=10).pack(side=tk.RIGHT)
 
 # --- SEKCJA TREEVIEW (TABELA) ---
 tk.Label(root, text="WYNIKI PORÓWNANIA I FILTROWANIA", font=(font_style_main, font_size_main), fg="#333").pack(pady=(10, 0))

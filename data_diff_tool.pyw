@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+
 ################
 # config start #
 ################
@@ -12,6 +13,15 @@ font_size_button = 9
 font_style_button = "Consolas"
 width=1200
 height=600
+
+SEPARATOR_MAP = {
+    "---  |  ---": "|",
+    "---  ;  ---": ";",
+    "---  ,  ---": ",",
+    "--- SOH ---": chr(1),
+    "--- # ---": "#",
+    "--- $ ---": "$"
+}
 
 ##############
 # config end #
@@ -153,14 +163,6 @@ def treeview_sort_column(tv, col, reverse):
 
 # --- KONFIGURACJA GUI ---
 
-SEPARATOR_MAP = {
-    "---  |  ---": "|",
-    "---  ;  ---": ";",
-    "---  ,  ---": ",",
-    "--- SOH ---": chr(1),
-    "--- # ---": "#",
-    "--- $ ---": "$"
-}
 
 root = tk.Tk()
 root.title(name + " " + version)

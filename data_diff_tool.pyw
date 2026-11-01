@@ -6,7 +6,7 @@ import re
 # KONFIGURACJA GLOBALNA I STAŁE
 ###############################################################################
 
-version = "v.1.4.2"
+version = "v.1.4.3"
 name = "Data Diff Tool"
 font_size_main = 11
 font_style_main = "Consolas"
@@ -79,7 +79,7 @@ class ToolTip:
 
 
 ###############################################################################
-# GŁÓWNA LOGIKA APLIKACJI (PORÓwnywanie i Filtrowanie)
+# GŁÓWNA LOGIKA APLIKACJI (Porównywanie i Filtrowanie)
 ###############################################################################
 
 def compare_data(*args):
@@ -112,8 +112,8 @@ def compare_data(*args):
             """Pomocnicza funkcja parsująca tekst wejściowy na słownik {klucz: wartość}."""
             d = {}
             escaped_sep = re.escape(active_sep)
-            # Dzielimy ciąg po głównym separatorze kolumn oraz dodatkowo po średnikach, przecinkach, tabach i nowych liniach
-            pattern = f'{escaped_sep}|[,;\n\t]+'
+            # Dzielimy ciąg po głównym separatorze kolumn
+            pattern = f'{escaped_sep}'
             pairs = re.split(pattern, text)
             for p in pairs:
                 p = p.strip()
@@ -138,8 +138,12 @@ def compare_data(*args):
             p1 = p1_raw.replace("\n", " ").replace("\r", " ").strip() if p1_raw != "<brak>" else p1_raw
             p2 = p2_raw.replace("\n", " ").replace("\r", " ").strip() if p2_raw != "<brak>" else p2_raw
 
-            display_p1 = f"{key}{kv_sep}{p1}" if p1 != "<brak>" else p1
-            display_p2 = f"{key}{kv_sep}{p2}" if p2 != "<brak>" else p2
+            if(is_kv_mode):
+                display_p1 = f"{p1}" if p1 != "<brak>" else p1
+                display_p2 = f"{p2}" if p2 != "<brak>" else p2
+            else:
+                display_p1 = f"{key}{kv_sep}{p1}" if p1 != "<brak>" else p1
+                display_p2 = f"{key}{kv_sep}{p2}" if p2 != "<brak>" else p2
 
             # Filtrowanie wyników na podstawie wpisanej frazy w wyszukiwarce
             if search_query and search_query not in key.lower() and search_query not in display_p1.lower() and search_query not in display_p2.lower():
